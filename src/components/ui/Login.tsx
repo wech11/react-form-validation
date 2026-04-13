@@ -6,7 +6,12 @@ interface LoginForm {
 }
 
 const Login = () => {
-  const { register, control, handleSubmit } = useForm<LoginForm>();
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginForm>();
   const onLogin: SubmitHandler<LoginForm> = (data) => {
     console.log(data);
   };
@@ -26,13 +31,22 @@ const Login = () => {
               Username
             </label>
             <input
-              {...register("username")}
+              {...register("username", {
+                required: "username harus diisi",
+                pattern: {
+                  value: /^[a-z0-9]+$/,
+                  message: "username hanya boleh mengandung huruf kecil dan angka",
+                }
+              })}
               type="text"
-              className="bg-gray-50 rounded-md focus:outline-2 focus:border-offset-2 focus:outline-teal-500 w-full p-2.5 placeholder:text-stone-300"
+              className={`bg-gray-50 rounded-md focus:outline-2 focus:border-offset-2 focus:outline-teal-500 w-full p-2.5 mb-0 placeholder:text-stone-300 ${errors.username && " border-2 border-red-500"}`}
               id="username"
               placeholder="insert your username"
               autoComplete="off"
             />
+            <span className="text-sm text-red-500">
+              {errors.username?.message}
+            </span>
           </div>
           <div className="space-y-1">
             <label
@@ -45,15 +59,28 @@ const Login = () => {
             <Controller
               name="password"
               control={control}
+              rules={{
+                required: "password harus diisi",
+                minLength: {
+                  value: 8,
+                  message: "password minimal 8 karakter",
+                },
+              }}
               render={({ field }) => (
-                <input
-                  {...field}
-                  type="password"
-                  className="bg-gray-50 rounded-md focus:outline-2 focus:border-offset-2 focus:outline-teal-500 w-full p-2.5 placeholder:text-stone-300"
-                  id="password"
-                  placeholder="insert your password"
-                  autoComplete="off"
-                />
+                <>
+                  <input
+                    {...field}
+                    type="password"
+                    className={`bg-gray-50 rounded-md focus:outline-2 focus:border-offset-2 focus:outline-teal-500 w-full p-2.5 placeholder:text-stone-300 mb-0 ${errors.password && " border-2 border-red-500"}`}
+                    id="password"
+                    placeholder="insert your password"
+                    autoComplete="off"
+                    aria-invalid={errors.password ? "true" : "false"}
+                  />
+                  <span className="text-sm text-red-500">
+                    {errors.password?.message}
+                  </span>
+                </>
               )}
             />
           </div>
