@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Product from "./components/ui/Product";
-import Login from "./components/ui/Login";
+// import Login from "./components/ui/Login";
+import LoginUsingZod from "./components/ui/LoginZod";
 
 function App() {
   const [session, setSession] = useState<boolean>(false);
@@ -9,7 +10,7 @@ function App() {
       {session ? (
         <Product setSession={setSession} />
       ) : (
-        <Login />
+        <LoginUsingZod />
       )}
     </main>
   );

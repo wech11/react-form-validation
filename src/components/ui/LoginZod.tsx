@@ -1,18 +1,25 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm, type SubmitHandler } from "react-hook-form";
+import * as  z from 'zod'
 
-interface LoginForm {
-  username: string;
-  password: string;
-}
+const loginSchema = z.object({
+  username: z.string('username harus diisi').min(5, "username minimal 5 karakter").regex(/^[a-z0-9]+$/, "username hanya boleh mengandung huruf kecil dan angka"),
+  password: z.string('password harus diisi').min(8, "password minimal 8 karakter"),
+  // email: z.string('email harus diisi').email("email tidak valid"),
+})
 
-const Login = () => {
+type LoginType = z.infer<typeof loginSchema>
+
+const LoginUsingZod = () => {
   const {
     register,
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginForm>();
-  const onLogin: SubmitHandler<LoginForm> = (data) => {
+  } = useForm<LoginType>({
+    resolver: zodResolver(loginSchema)
+  });
+  const onLogin: SubmitHandler<LoginType> = (data) => {
     console.log(data);
   };
 
@@ -31,13 +38,7 @@ const Login = () => {
               Username
             </label>
             <input
-              {...register("username", {
-                required: "username harus diisi",
-                pattern: {
-                  value: /^[a-z0-9]+$/,
-                  message: "username hanya boleh mengandung huruf kecil dan angka",
-                }
-              })}
+              {...register("username")}
               type="text"
               className={`bg-gray-50 rounded-md focus:outline-2 focus:border-offset-2 focus:outline-teal-500 w-full p-2.5 mb-0 placeholder:text-stone-300 ${errors.username && " border-2 border-red-500"}`}
               id="username"
@@ -59,13 +60,6 @@ const Login = () => {
             <Controller
               name="password"
               control={control}
-              rules={{
-                required: "password harus diisi",
-                minLength: {
-                  value: 8,
-                  message: "password minimal 8 karakter",
-                },
-              }}
               render={({ field }) => (
                 <>
                   <input
@@ -96,4 +90,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default LoginUsingZod;
