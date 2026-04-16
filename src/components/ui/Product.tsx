@@ -15,14 +15,13 @@ const getData = async () => {
 const Product = ({
   setSession
 }: {
-  setSession: Dispatch<SetStateAction<boolean>>;
+  setSession: Dispatch<SetStateAction<string | null>>;
 }) => {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["products"],
     queryFn: () => getData(),
   });
 
-  console.log(data);
 
   return (
     <div className="container w-full py-10 mx-auto space-y-4">
@@ -30,7 +29,7 @@ const Product = ({
         <h2 className="text-3xl font-bold">Product</h2>
         <button
           className="px-4 py-2 text-sm font-semibold text-white bg-gray-800 rounded-md hover:bg-gray-600"
-          onClick={() => setSession(false)}
+          onClick={() => setSession(null)}
         >
           Logout
         </button>

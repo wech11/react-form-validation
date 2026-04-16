@@ -1,26 +1,66 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import { type Dispatch, type SetStateAction } from "react";
 import { Controller, useForm, type SubmitHandler } from "react-hook-form";
-import * as  z from 'zod'
+import * as z from "zod";
 
 const loginSchema = z.object({
-  username: z.string('username harus diisi').min(5, "username minimal 5 karakter").regex(/^[a-z0-9]+$/, "username hanya boleh mengandung huruf kecil dan angka"),
-  password: z.string('password harus diisi').min(8, "password minimal 8 karakter"),
+  username: z
+    .string("username harus diisi")
+    .min(5, "username minimal 5 karakter")
+    .regex(
+      /^[a-z0-9_]+$/,
+      "username hanya boleh mengandung huruf kecil, angka, dan underscore",
+    ),
+  password: z
+    .string("password harus diisi")
+    .min(6, "password minimal 6 karakter"),
   // email: z.string('email harus diisi').email("email tidak valid"),
-})
+});
 
-type LoginType = z.infer<typeof loginSchema>
+type LoginType = z.infer<typeof loginSchema>;
 
-const LoginUsingZod = () => {
+const LoginUsingZod = ({
+  setSession,
+  setIsRegistering,
+}: {
+  setSession: Dispatch<SetStateAction<string | null>>;
+  setIsRegistering: Dispatch<SetStateAction<boolean>>;
+}) => {
+  // const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const {
     register,
     control,
     handleSubmit,
     formState: { errors },
   } = useForm<LoginType>({
-    resolver: zodResolver(loginSchema)
+    resolver: zodResolver(loginSchema),
   });
+
+  const { mutate, isPending } = useMutation({
+    mutationKey: ["login"],
+    mutationFn: async (data: LoginType) => {
+      const res = await fetch("https://fakestoreapi.com/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      }).then((res) => res.json());
+      return res;
+    },
+    onSuccess: (data) => {
+      setSession(data.token);
+    },
+    onError: () => {
+      // setErrorMessage("Login failed. Please check your credentials.");
+      alert("Login failed. Username and password does'nt match.");
+    },
+  });
+
   const onLogin: SubmitHandler<LoginType> = (data) => {
-    console.log(data);
+    mutate(data);
   };
 
   return (
@@ -79,12 +119,18 @@ const LoginUsingZod = () => {
             />
           </div>
           <button
-            className="w-full px-4 py-2 font-semibold text-white bg-teal-500 rounded-md hover:bg-teal-700"
+            className="w-full px-4 py-2 font-semibold text-white bg-teal-500 rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
             type="submit"
+            disabled={isPending}
           >
-            Login
+            {isPending ? "Logging in..." : "Sign In"}
           </button>
         </form>
+        <button
+          onClick={() => setIsRegistering(false)}
+          className="w-full text-sm text-center text-teal-500"
+        > Don't have an account? <span className="hover:underline">Register here.</span>
+        </button>
       </div>
     </main>
   );
